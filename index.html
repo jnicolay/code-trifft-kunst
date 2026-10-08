@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Klingende Bilder · Coding-Labor</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#26263b;background:#f5f3fa}*{box-sizing:border-box}body{margin:0}main{max-width:900px;margin:0 auto;padding:20px}header{padding:16px 0}h1{margin:0;font-size:2.1rem}h2{margin:0 0 12px;font-size:1.25rem}p{line-height:1.45}section{background:white;border-radius:16px;padding:20px;margin:15px 0;box-shadow:0 2px 12px #2221}.muted{color:#56546b;font-size:.92rem}button{background:#443d93;color:white;border:0;border-radius:10px;padding:12px 15px;font-size:1rem;cursor:pointer}button.secondary{background:#ece9f9;color:#302b64}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #e5a027}.pads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pad{min-height:100px;font-weight:700;background:#6056aa}.pad:active{background:#b15c61}label{display:block;font-weight:600;margin:13px 0}input[type=file]{display:block;width:100%;max-width:100%;margin:5px 0;font-weight:400}textarea{width:100%;min-height:335px;resize:vertical;padding:14px;font-size:14px;line-height:1.5;border:1px solid #bcb6ce;border-radius:10px;font-family:ui-monospace,monospace}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.status{padding:10px;border-radius:8px;background:#f1eefb;white-space:pre-wrap}.hint{border-left:4px solid #8376bc;padding-left:12px}.soundrow{padding:7px 0;border-bottom:1px solid #eee}.soundrow span{display:block;font-size:.82rem;color:#59556c}code{background:#eeeafa;border-radius:3px;padding:1px 3px}@media(max-width:480px){main{padding:12px}.pad{min-height:86px;font-size:.9rem}section{padding:15px}}
+
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:12px}.fxchannel{border:1px solid #d6d0e8;background:#faf9fe;padding:14px;border-radius:12px}.fxchannel h3{margin:0 0 10px}.fxchannel label{display:flex;justify-content:space-between;gap:10px;margin:12px 0 4px;font-size:.87rem}.fxchannel input[type=range]{width:100%;accent-color:#5d48a6}.fxchannel select{max-width:100%;padding:7px;width:100%;border:1px solid #bbb;border-radius:8px;background:white}.fxchannel .small{font-size:.8rem;color:#605c70}.fxchannel button{font-size:.82rem;padding:7px 11px}.fxchannel button:disabled{opacity:.5}
+</style></head><body><main>
+<header><h1>🎨 Klingende Bilder</h1><p>Gestalte dein eigenes Klangkunstwerk mit JavaScript – am Laptop oder Handy – erst als Simulation, danach mit echten Touchflächen.</p></header>
+<section><h2>1 · Starte dein Klangbild</h2><button id="enable">🔊 Audio einschalten</button> <button id="bleConnect" class="secondary">🔵 Per Bluetooth verbinden</button> <button id="bleDisconnect" class="secondary" hidden>Bluetooth trennen</button><p id="bleStatus" class="muted">Bluetooth optional · WLAN funktioniert weiterhin.</p><p class="muted">Tippe danach auf die Felder. Ohne eigene Dateien hörst du Sinustöne.</p><div id="status" class="status" role="status">Bereit – Audio noch nicht aktiviert.</div></section>
+<section><h2>2 · Spiele dein Bild</h2><div class="pads"><button class="pad" data-pad="0">☁️<br>Fläche 1</button><button class="pad" data-pad="1">🐦<br>Fläche 2</button><button class="pad" data-pad="2">⚡<br>Fläche 3</button></div><p class="muted">Die Flächen reagieren auf Drücken UND Loslassen. Tipp: <code>beruehrungStart(0)</code> und <code>beruehrungEnde(0)</code>.</p></section>
+<section><h2>3 · Eigene Klänge</h2><p>Lade eine MP3-, WAV- oder M4A-Datei pro Fläche hoch (sofern dein Browser sie unterstützt). iPhone-Sprachmemos kannst du über „Teilen → In Dateien sichern“ auswählen.</p><div class="soundrow"><label>Fläche 1<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" data-file="0"></label><span id="filename0">Sinuston als Standard</span></div><div class="soundrow"><label>Fläche 2<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" data-file="1"></label><span id="filename1">Sinuston als Standard</span></div><div class="soundrow"><label>Fläche 3<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" data-file="2"></label><span id="filename2">Sinuston als Standard</span></div><p class="muted">Deine Aufnahmen verlassen den Browser nicht. Über „Projekt exportieren“ kannst du Programm UND alle Sounds zusammen speichern; mit „Projekt importieren“ holst du alles zurück.</p></section>
+<section><h2>4 · Live-FX-Mischpult</h2><p>Verändere die Sounds <strong>während sie spielen</strong>. Pro Fläche gibt es eigene Regler. Alle Einstellungen werden mit deinem JSON-Projekt exportiert.</p><div class="fxgrid" id="fxgrid"></div><div class="actions"><button class="secondary" id="fxreset">↺ Alle Effekte zurücksetzen</button></div><p class="muted">Pitch = Geschwindigkeit und Tonhöhe zusammen; Hall und Delay hören nach dem Stoppen kurz aus. Für einen längeren Klang: Modus „Loop“ oder „Hold“ wählen.</p></section>
+<section><h2>5 · Programmiere dein Klangbild</h2><p>Ändere Werte, füge <code>if</code>-Bedingungen hinzu oder kombiniere Sounds und Sinustöne. Drücke danach „Programm starten“.</p><textarea id="editor" spellcheck="false" aria-label="JavaScript-Editor"></textarea><div class="actions"><button id="run">▶ Programm starten</button><button id="save" class="secondary">💾 Code speichern</button><button id="export" class="secondary">⬇ Projekt exportieren (mit Sounds)</button><label class="secondary" style="display:inline-block">⬆ Projekt importieren <input id="import" type="file" accept=".json,application/json" style="display:block;max-width:210px"></label><button id="reset" class="secondary">↺ Zurücksetzen</button></div><p id="message" class="status" role="status">Noch nicht gestartet.</p><p class="hint muted">Programmierhilfe: <code>sampleStart(0)</code>, <code>sampleStop(0)</code>, <code>sampleLoop(0)</code>, <code>sampleRandomPitch(1)</code>, <code>sampleDelay(2,0.3,0.4)</code>, <code>sampleReverb(0,0.7)</code>, <code>sampleFadeOut(0,1)</code>, <code>samplePitch(0,1.5)</code>, <code>sampleFilter(0,900)</code>. Alte Projekte mit <code>beruehrung(flaeche)</code> bleiben nutzbar.</p></section>
+<section><h2>6 · Deine Experimente</h2><p>Versuche einen Klang nur während des Drückens abzuspielen, ihn zu loopen, zu pitchen oder mit Hall und Delay zu versehen. Oder nutze <code>if (flaeche === 1)</code>, um nur bei Fläche 2 etwas auszulösen.</p><p class="muted">Auf GitHub Pages: Simulation oder Bluetooth mit Chrome/Edge. Auf http://192.168.4.1 im ESP32-WLAN: echte Berührungen. Für die Schule die Projektdatei exportieren und am privaten Laptop importieren.</p></section>
+</main><script>
+'use strict';
+const starter = `// Dein klingendes Bild! 0, 1 und 2 sind die drei Flächen.
+// Der Klang von Fläche 1 läuft nur, solange du drückst.
+function beruehrungStart(flaeche) {
+  if (flaeche === 0) {
+    sampleReverb(0, 0.4);
+    sampleLoop(0);
+  }
+  if (flaeche === 1) {
+    sampleRandomPitch(1);
+  }
+  if (flaeche === 2) {
+    sampleDelay(2, 0.3, 0.4);
+    sampleStart(2);
+  }
+}
+function beruehrungEnde(flaeche) {
+  if (flaeche === 0) {
+    sampleFadeOut(0, 0.25);
+  }
+}
+`;
+let context = null, onDown=()=>{}, onUp=()=>{};
+const sounds=[null,null,null], frequencies=[330,660,165];
+const buffers=[null,null,null], voices=[[],[],[]];
+const settings=Array.from({length:3},()=>({volume:0.75,delay:0,feedback:0,reverb:0,pitch:1,filter:18000,mode:'code'}));
+const graphs=[null,null,null];
+const pressedPads=[false,false,false];
+const $=window.$ || (id=>document.getElementById(id));
+function message(s){$('message').textContent=s;}
+async function startAudio(){try{context ||= new (window.AudioContext||window.webkitAudioContext)();await context.resume();for(let i=0;i<3;i++)if(sounds[i]&&!buffers[i])await decodeSound(i);$('status').textContent='Audio bereit. Probiere die Flächen.';}catch(e){$('status').textContent='Audio-Fehler: '+e.message;}}
+function ensureAudio(){if(!context||context.state!=='running'){message('Erst Audio einschalten.');return false;}return true;}
+function spieleTon(hz,duration=0.35){if(!ensureAudio())return;hz=Number(hz);duration=Number(duration);if(!Number.isFinite(hz)||!Number.isFinite(duration)||hz<40||hz>5000||duration<=0||duration>10)return;const o=context.createOscillator(),g=context.createGain(),t=context.currentTime;o.frequency.value=hz;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g).connect(context.destination);o.start(t);o.stop(t+duration+.02);}
+function validPad(i){return Number.isInteger(Number(i))&&Number(i)>=0&&Number(i)<3;}
+function clamp(v,min,max,fallback){v=Number(v);return Number.isFinite(v)?Math.max(min,Math.min(max,v)):fallback;}
+function setFX(i,key,value){i=Number(i);if(!validPad(i))return;const s=settings[i];s[key]=value;updateGraph(i);syncFX(i);}
+function sampleLautstaerke(i,v){setFX(i,'volume',clamp(v,0,1,.75));}
+function sampleDelay(i,seconds=.3,feedback=.35){setFX(i,'delay',clamp(seconds,0,1.5,0));setFX(i,'feedback',clamp(feedback,0,.85,0));}
+function sampleReverb(i,mix=.5){setFX(i,'reverb',clamp(mix,0,1,0));}
+function samplePitch(i,rate=1){setFX(i,'pitch',clamp(rate,.25,4,1));}
+function sampleFilter(i,hz=18000){setFX(i,'filter',clamp(hz,100,18000,18000));}
+function updateGraph(i){if(!context)return;const g=graphs[i],s=settings[i];if(g){const t=context.currentTime;g.volume.gain.setTargetAtTime(s.volume,t,.025);g.filter.frequency.setTargetAtTime(s.filter,t,.035);g.delay.delayTime.setTargetAtTime(s.delay,t,.035);g.feedback.gain.setTargetAtTime(s.feedback,t,.035);g.delayWet.gain.setTargetAtTime(s.delay>0?.45:0,t,.03);g.reverbWet.gain.setTargetAtTime(s.reverb*.6,t,.03);g.dry.gain.setTargetAtTime(1-s.reverb*.5,t,.03);}voices[i].forEach(v=>{try{v.src.playbackRate.setTargetAtTime(v.baseRate*s.pitch,context.currentTime,.035);}catch(e){}});}
+let impulse=null;
+function reverbImpulse(){if(impulse)return impulse;const rate=context.sampleRate,len=Math.floor(rate*1.7);impulse=context.createBuffer(2,len,rate);for(let ch=0;ch<2;ch++){const a=impulse.getChannelData(ch);for(let j=0;j<len;j++)a[j]=(Math.random()*2-1)*Math.pow(1-j/len,3);}return impulse;}
+function audioGraph(i){if(graphs[i])return graphs[i];const s=settings[i];const input=context.createGain(),volume=context.createGain(),filter=context.createBiquadFilter(),dry=context.createGain(),delay=context.createDelay(2),feedback=context.createGain(),delayWet=context.createGain(),conv=context.createConvolver(),reverbWet=context.createGain();filter.type='lowpass';conv.buffer=reverbImpulse();input.connect(volume);volume.connect(filter);filter.connect(dry).connect(context.destination);filter.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(delayWet).connect(context.destination);filter.connect(conv);conv.connect(reverbWet).connect(context.destination);graphs[i]={input,volume,filter,dry,delay,feedback,delayWet,reverbWet};updateGraph(i);return graphs[i];}
+function sampleStart(i,pitch=1,loop=false){i=Number(i);if(!validPad(i)||!ensureAudio())return;pitch=clamp(pitch,.25,4,1);const buffer=buffers[i];if(!buffer){spieleTon(frequencies[i]*pitch*settings[i].pitch,loop?1.2:.5);return;}const src=context.createBufferSource(),gain=context.createGain();src.buffer=buffer;src.loop=!!loop;src.playbackRate.value=pitch*settings[i].pitch;gain.gain.value=1;src.connect(gain).connect(audioGraph(i).input);const voice={src,gain,baseRate:pitch};voices[i].push(voice);src.onended=()=>{voices[i]=voices[i].filter(x=>x!==voice);try{src.disconnect();gain.disconnect()}catch(e){}};src.start();return voice;}
+function sampleStop(i){i=Number(i);if(!validPad(i)||!context)return;const now=context.currentTime;voices[i].slice().forEach(v=>{try{v.gain.gain.cancelScheduledValues(now);v.gain.gain.setValueAtTime(v.gain.gain.value,now);v.gain.gain.linearRampToValueAtTime(0,now+.035);v.src.stop(now+.045)}catch(e){}});}
+function sampleFadeOut(i,seconds=1){i=Number(i);if(!validPad(i)||!context)return;const now=context.currentTime,d=clamp(seconds,.02,10,1);voices[i].slice().forEach(v=>{try{v.gain.gain.cancelScheduledValues(now);v.gain.gain.setValueAtTime(v.gain.gain.value,now);v.gain.gain.linearRampToValueAtTime(0,now+d);v.src.stop(now+d+.02)}catch(e){}});}
+function sampleLoop(i,pitch=1){return sampleStart(i,pitch,true);}
+function sampleRandomPitch(i,min=.5,max=1.7){min=Number(min);max=Number(max);if(!Number.isFinite(min)||!Number.isFinite(max))return;return sampleStart(i,Math.min(min,max)+Math.random()*Math.abs(max-min));}
+function spieleSample(i){return sampleStart(i);}// Kompatibilität mit alten Projekten
+async function decodeSound(i){buffers[i]=null;if(!sounds[i]||!context)return;try{const raw=await sounds[i].file.arrayBuffer();buffers[i]=await context.decodeAudioData(raw);$('filename'+i).textContent=sounds[i].name+' · bereit';}catch(e){$('filename'+i).textContent=sounds[i].name+' · Format nicht abspielbar';message('Dieser Browser kann '+sounds[i].name+' nicht dekodieren. Bitte MP3 oder WAV versuchen.');}}
+async function addFile(i,file){if(!file)return; if(sounds[i])URL.revokeObjectURL(sounds[i].url);const url=URL.createObjectURL(file);sounds[i]={url,name:file.name,file};$('filename'+i).textContent=file.name+' · bereit';message('Datei geladen: '+file.name+' (Audio aktivieren, dann testen)');await decodeSound(i);}
+function runCode(){try{const names=['spieleTon','spieleSample','sampleStart','sampleStop','sampleLoop','sampleRandomPitch','sampleLautstaerke','sampleFadeOut','sampleDelay','sampleReverb','samplePitch','sampleFilter'];const f=new Function(...names,$('editor').value+'\nreturn {start:typeof beruehrungStart==="function"?beruehrungStart:(typeof beruehrung==="function"?beruehrung:null),end:typeof beruehrungEnde==="function"?beruehrungEnde:null};');const r=f(...names.map(n=>({spieleTon,spieleSample,sampleStart,sampleStop,sampleLoop,sampleRandomPitch,sampleLautstaerke,sampleFadeOut,sampleDelay,sampleReverb,samplePitch,sampleFilter})[n]));if(!r.start)throw Error('Funktion beruehrungStart(flaeche) oder beruehrung(flaeche) fehlt');onDown=r.start;onUp=r.end||(()=>{});message('Programm läuft: Berühren und Loslassen testen.');}catch(e){message('Codefehler: '+e.message);}}
+function padDown(i){if(!validPad(i)||pressedPads[i])return;pressedPads[i]=true;try{if(settings[i].mode==='code')onDown(i);else if(settings[i].mode==='hold')sampleLoop(i);else if(settings[i].mode==='loop') {if(voices[i].length)sampleStop(i);else sampleLoop(i);}else sampleStart(i);}catch(e){message('Codefehler: '+e.message);}}
+function padUp(i){if(!validPad(i)||!pressedPads[i])return;pressedPads[i]=false;try{if(settings[i].mode==='code')onUp(i);else if(settings[i].mode==='hold')sampleStop(i);}catch(e){message('Codefehler: '+e.message);}}
+
+const FX_FIELDS=[['pitch','Pitch / Speed',.5,2,.05,v=>v.toFixed(2)+'×'],['volume','Lautstärke',0,1,.01,v=>Math.round(v*100)+' %'],['filter','Lowpass-Filter',100,18000,100,v=>Math.round(v)+' Hz'],['delay','Delay-Zeit',0,1.5,.05,v=>Math.round(v*1000)+' ms'],['feedback','Delay-Feedback',0,.8,.05,v=>Math.round(v*100)+' %'],['reverb','Hall',0,1,.05,v=>Math.round(v*100)+' %']];
+function buildFX(){const root=$('fxgrid');for(let i=0;i<3;i++){const card=document.createElement('div');card.className='fxchannel';card.innerHTML='<h3>🎚️ Fläche '+(i+1)+'</h3><label for="mode'+i+'">Spielmodus</label><select id="mode'+i+'"><option value="code">JavaScript-Code</option><option value="hold">Hold · nur bei Berührung</option><option value="loop">Loop · ein/aus</option><option value="one">Einmal abspielen</option></select><div id="sliders'+i+'"></div><button class="secondary" type="button" data-test="'+i+'">▶ Testen</button>';root.append(card);const mode=$('mode'+i);mode.value=settings[i].mode;mode.onchange=()=>{settings[i].mode=mode.value;sampleStop(i);};card.querySelector('[data-test]').onclick=()=>{if(!ensureAudio())return;sampleStart(i)};for(const [key,label,min,max,step,fmt] of FX_FIELDS){const row=document.createElement('div');const id='fx'+i+key;row.innerHTML='<label for="'+id+'"><span>'+label+'</span><output id="val'+i+key+'"></output></label><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'">';$('sliders'+i).append(row);$(id).addEventListener('input',e=>{setFX(i,key,Number(e.target.value))});}}for(let i=0;i<3;i++)syncFX(i);}
+function syncFX(i){if(!$('mode'+i))return;$('mode'+i).value=settings[i].mode;for(const [key,label,min,max,step,fmt] of FX_FIELDS){const input=$('fx'+i+key);if(document.activeElement!==input)input.value=settings[i][key];$('val'+i+key).textContent=fmt(settings[i][key]);}}
+$('fxreset').onclick=()=>{for(let i=0;i<3;i++){Object.assign(settings[i],{volume:.75,delay:0,feedback:0,reverb:0,pitch:1,filter:18000,mode:'code'});updateGraph(i);syncFX(i);}message('Live-FX zurückgesetzt.');};
+buildFX();
+
+$('enable').addEventListener('click',startAudio);
+document.querySelectorAll('[data-pad]').forEach(b=>{const i=Number(b.dataset.pad);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);padDown(i);});b.addEventListener('pointerup',()=>padUp(i));b.addEventListener('pointercancel',()=>padUp(i));b.addEventListener('lostpointercapture',()=>padUp(i));});
+document.querySelectorAll('[data-file]').forEach(el=>el.addEventListener('change',()=>addFile(Number(el.dataset.file),el.files[0])));
+$('run').addEventListener('click',runCode);
+$('save').addEventListener('click',()=>{try{localStorage.setItem('klangbilder.github.code',$('editor').value);message('Code auf diesem Gerät gespeichert. Audio-Dateien bitte später erneut auswählen.');}catch(e){message('Speichern hier nicht möglich. Bitte Code herunterladen.');}});
+function readAsDataURL(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error||Error('Datei nicht lesbar'));reader.readAsDataURL(file);});}
+async function exportProject(){
+ try{
+  message('Projekt wird zusammengestellt …');
+  const audio=[];
+  for(let i=0;i<3;i++){
+   const s=sounds[i];
+   audio.push(s?{name:s.name,data:await readAsDataURL(s.file)}:null);
+  }
+  const project={format:'klingende-bilder',version:1,code:$('editor').value,audio,fx:settings.map(s=>({...s}))};
+  const blob=new Blob([JSON.stringify(project)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='mein-klangbild-projekt.json';document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+  message('Projekt heruntergeladen – JavaScript und Sounds in einer Datei.');
+ }catch(e){message('Export fehlgeschlagen: '+e.message);}
+}
+async function importProject(file){
+ if(!file)return;
+ try{
+  if(file.size>80*1024*1024)throw Error('Projektdatei zu groß (maximal 80 MB)');
+  const project=JSON.parse(await file.text());
+  if(project.format!=='klingende-bilder'||project.version!==1||typeof project.code!=='string'||!Array.isArray(project.audio)||project.audio.length!==3)throw Error('Keine gültige Klangbilder-Projektdatei');
+  const restored=[];
+  for(let i=0;i<3;i++){
+   const item=project.audio[i];
+   if(item===null){restored.push(null);continue;}
+   if(!item||typeof item.name!=='string'||typeof item.data!=='string'||!/^data:(audio\/|application\/octet-stream)/.test(item.data))throw Error('Ungültiger Sound bei Fläche '+(i+1));
+   const response=await fetch(item.data);
+   const blob=await response.blob();
+   if(blob.size>20*1024*1024)throw Error('Sound zu groß bei Fläche '+(i+1));
+   restored.push(new File([blob],item.name,{type:blob.type}));
+  }
+  $('editor').value=project.code;
+  for(let i=0;i<3;i++){
+   if(sounds[i])URL.revokeObjectURL(sounds[i].url);
+   if(restored[i]){
+    const f=restored[i];sounds[i]={url:URL.createObjectURL(f),name:f.name,file:f};
+    $('filename'+i).textContent=f.name+' · importiert';
+   }else{sounds[i]=null;$('filename'+i).textContent='Sinuston als Standard';}
+  }
+  if(Array.isArray(project.fx)){for(let i=0;i<3;i++){const p=project.fx[i]||{};for(const [key,label,min,max] of FX_FIELDS){if(p[key]!==undefined)settings[i][key]=clamp(p[key],min,max,settings[i][key]);}settings[i].mode=['code','hold','loop','one'].includes(p.mode)?p.mode:'code';updateGraph(i);syncFX(i);}}
+  for(let i=0;i<3;i++)if(context&&sounds[i])await decodeSound(i);
+  runCode();message('Projekt importiert: Code, Sounds und Live-FX bereit. Audio einschalten und testen.');
+ }catch(e){message('Import fehlgeschlagen: '+e.message);}
+}
+$('export').addEventListener('click',exportProject);
+$('import').addEventListener('change',e=>importProject(e.target.files[0]));
+$('reset').addEventListener('click',()=>{if(confirm('Code zurücksetzen?')){$('editor').value=starter;runCode();}});
+try{$('editor').value=localStorage.getItem('klangbilder.github.code')||starter;}catch(e){$('editor').value=starter;}
+runCode();
+
+// BLE-Verbindung für HTTPS-Webseite (Chrome/Edge unter Android, Windows, macOS).
+const BLE_SERVICE='1d94a1b0-bac0-4c32-a221-54d4d917f110';
+const BLE_TOUCH='1d94a1b1-bac0-4c32-a221-54d4d917f110';
+let bleDevice=null,bleChar=null;
+function bleStatus(s){$('bleStatus').textContent=s;}
+function disconnected(){bleChar=null;bleDevice=null;$('bleConnect').hidden=false;$('bleDisconnect').hidden=true;bleStatus('Bluetooth getrennt. WLAN oder Simulation weiterhin möglich.');}
+function onBleTouch(e){
+ const value=new TextDecoder().decode(e.target.value);
+ const pad=Number(value.trim());
+ if(/^D:[012]$/.test(value.trim()))padDown(Number(value.trim().slice(2)));else if(/^U:[012]$/.test(value.trim()))padUp(Number(value.trim().slice(2)));else if(Number.isInteger(pad)&&pad>=0&&pad<3){padDown(pad);setTimeout(()=>padUp(pad),120);}
+}
+$('bleConnect').addEventListener('click',async()=>{
+ if(!navigator.bluetooth){bleStatus('Web Bluetooth nicht verfügbar. Android Chrome / Desktop Chrome oder Edge über HTTPS benutzen; iPhone Safari: ESP-WLAN.');return;}
+ try{
+  bleStatus('Bluetooth-Gerät auswählen …');
+  const device=await navigator.bluetooth.requestDevice({filters:[{services:[BLE_SERVICE]}]});
+  bleDevice=device;device.addEventListener('gattserverdisconnected',disconnected);
+  const gatt=await device.gatt.connect();
+  const service=await gatt.getPrimaryService(BLE_SERVICE);
+  bleChar=await service.getCharacteristic(BLE_TOUCH);
+  await bleChar.startNotifications();
+  bleChar.addEventListener('characteristicvaluechanged',onBleTouch);
+  $('bleConnect').hidden=true;$('bleDisconnect').hidden=false;
+  bleStatus('Bluetooth verbunden: '+(device.name||'Klangbild')+'. Jetzt die Touchflächen berühren.');
+ }catch(e){bleStatus('Bluetooth-Verbindung fehlgeschlagen: '+e.message);}
+});
+$('bleDisconnect').addEventListener('click',()=>{if(bleDevice&&bleDevice.gatt.connected)bleDevice.gatt.disconnect();else disconnected();});
+
+let lastTouchEvent=null;let espOnline=false;
+async function readTouch(){try{const r=await fetch('/touch',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(!espOnline){espOnline=true;$('status').textContent='ESP32 verbunden · Audio auf diesem Laptop';}if(Array.isArray(d.pressed)){d.pressed.forEach((on,i)=>on?padDown(i):padUp(i));}else if(lastTouchEvent!==null&&d.event!==lastTouchEvent&&validPad(d.flaeche)){padDown(d.flaeche);setTimeout(()=>padUp(d.flaeche),150);}lastTouchEvent=d.event;}catch(e){}}
+if(location.hostname==='192.168.4.1')setInterval(readTouch,70);
+</script></body></html>
